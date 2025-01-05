@@ -236,6 +236,7 @@ impl RenderManager {
                             // TODO: Maybe factor this out?
                             // TODO: How do I save the state so I can print?
                             // TODO: The store stuff should be behind a feature flag
+
                             match voice.get_batch(
                                 remaining_buffer_size,
                                 None,
@@ -315,7 +316,7 @@ impl RenderManager {
                 remaining_buffer_size = remaining_buffer_size.saturating_sub(samples_processed);
             }
 
-            if render_finished {
+            if render_finished || (next_exists && !Settings::global().loop_play) {
                 if self.exists_next_render() {
                     self.inc_render();
                     // self.push_store_to_current_render();

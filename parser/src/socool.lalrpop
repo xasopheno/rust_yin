@@ -466,9 +466,6 @@ Rational: Rational64 = {
     <n: Int> "/" <d:Int> => Rational64::new(n, d),
 };
 
-
-
-
 Axis: Axis = {
     F => Axis::F,
     G => Axis::G,
