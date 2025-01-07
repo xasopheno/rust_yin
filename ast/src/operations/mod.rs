@@ -52,6 +52,7 @@ pub struct PointOp {
     pub filters: Vec<BiquadFilterDef>,
     /// Should fade out to nothing
     pub is_out: bool,
+    pub follows: Vec<crate::follow::types::FollowNF>,
 }
 
 impl Default for PointOp {
@@ -72,6 +73,7 @@ impl Default for PointOp {
             names: NameSet::new(),
             filters: vec![],
             is_out: false,
+            follows: vec![],
         }
     }
 }
@@ -233,6 +235,12 @@ impl Mul<PointOp> for PointOp {
                 .map(|f| f.to_owned())
                 .collect(),
             is_out: other.is_out,
+            follows: self
+                .follows
+                .iter()
+                .cloned()
+                .chain(other.follows.iter().cloned())
+                .collect(),
         }
     }
 }
@@ -272,6 +280,12 @@ impl<'a> Mul<&'a PointOp> for &PointOp {
                 .map(|f| f.to_owned())
                 .collect(),
             is_out: other.is_out,
+            follows: self
+                .follows
+                .iter()
+                .cloned()
+                .chain(other.follows.iter().cloned())
+                .collect(),
         }
     }
 }
@@ -309,6 +323,12 @@ impl MulAssign for PointOp {
                 .map(|f| f.to_owned())
                 .collect(),
             is_out: other.is_out,
+            follows: self
+                .follows
+                .iter()
+                .cloned()
+                .chain(other.follows.iter().cloned())
+                .collect(),
         }
     }
 }
@@ -356,6 +376,12 @@ impl PointOp {
                 .map(|f| f.to_owned())
                 .collect(),
             is_out: other.is_out,
+            follows: self
+                .follows
+                .iter()
+                .cloned()
+                .chain(other.follows.iter().cloned())
+                .collect(),
         }
     }
 
@@ -376,6 +402,7 @@ impl PointOp {
             names: NameSet::new(),
             filters: vec![],
             is_out: false,
+            follows: vec![],
         }
     }
     pub fn init_silent() -> PointOp {
@@ -395,6 +422,7 @@ impl PointOp {
             names: NameSet::new(),
             filters: vec![],
             is_out: false,
+            follows: vec![],
         }
     }
 

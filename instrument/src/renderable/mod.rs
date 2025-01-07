@@ -8,7 +8,10 @@ use rand::{thread_rng, Rng};
 pub use render_voice::{renderables_to_render_voices, RenderVoice};
 use scop::Defs;
 use serde::{Deserialize, Serialize};
-use weresocool_ast::{NormalForm, Normalize, OscType, PointOp, Term, ASR};
+use weresocool_ast::{
+    follow::evaluate::EvaluateAction, follow::types::FollowNF, NormalForm, Normalize, OscType,
+    PointOp, Term, ASR,
+};
 use weresocool_error::Error;
 use weresocool_filter::BiquadFilterDef;
 pub(crate) use weresocool_shared::{lossy_rational_mul, r_to_f64, Settings};
@@ -37,7 +40,7 @@ pub struct RenderOp {
     pub names: Vec<String>,
     pub filters: Vec<BiquadFilterDef>,
     pub next_out: bool,
-    pub follow: bool,
+    pub follows: Vec<FollowNF>,
 }
 
 impl RenderOp {
@@ -64,7 +67,7 @@ impl RenderOp {
             next_out: false,
             names: Vec::new(),
             filters: Vec::new(),
-            follow: true,
+            follows: Vec::new(),
         }
     }
 
@@ -91,7 +94,7 @@ impl RenderOp {
             next_out: false,
             names: Vec::new(),
             filters: Vec::new(),
-            follow: true,
+            follows: Vec::new(),
         }
     }
     pub fn init_silent_with_length(l: f64) -> Self {
@@ -117,7 +120,7 @@ impl RenderOp {
             next_out: false,
             names: Vec::new(),
             filters: Vec::new(),
-            follow: true,
+            follows: Vec::new(),
         }
     }
 
@@ -150,7 +153,7 @@ impl RenderOp {
             next_out: false,
             names: vec![],
             filters,
-            follow: true,
+            follows: vec![],
         }
     }
 }
@@ -183,13 +186,10 @@ impl Renderable<RenderOp> for RenderOp {
     fn render(&mut self, oscillator: &mut Oscillator, offset: Option<&Offset>) -> StereoWaveform {
         let o = match offset {
             Some(o) => {
-                if self.follow {
-                    Offset {
-                        freq: o.freq,
-                        gain: o.gain,
-                    }
-                } else {
-                    Offset::default()
+                let (f, g) = self.follows.eval_value(o.freq as f32, o.gain as f32);
+                Offset {
+                    freq: f as f64,
+                    gain: g as f64,
                 }
             }
             None => Offset::default(),
@@ -281,7 +281,7 @@ fn pointop_to_renderop(
             })
             .collect(),
         next_out,
-        follow: true,
+        follows: point_op.follows.clone(),
     };
 
     *time += point_op.l * basis.l;

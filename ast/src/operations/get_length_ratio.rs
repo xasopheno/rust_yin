@@ -13,6 +13,7 @@ impl GetLengthRatio<Term> for Op {
     ) -> Result<Rational64, Error> {
         match self {
             Op::AsIs {}
+            | Op::Follow(..)
             | Op::Out {}
             | Op::Lowpass { .. }
             | Op::FMOsc { .. }

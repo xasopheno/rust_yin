@@ -21,6 +21,9 @@ use weresocool_ast::{
         Scale,
         FmOscDef
 };
+use weresocool_ast::follow::types::{
+  Follow, FollowRule, FollowCondition, FollowAction, FollowVariable, FollowExpr, FollowComparison, FollowSimpleCondition, FollowAndCondition
+};
 use crate::parser::{Init, handle_fit_length_recursively};
 use crate::indices::{et, random_seed};
 use crate::float_to_rational::helpers::*;
@@ -257,6 +260,7 @@ BaseOperation: Term = {
     r"\\|Lambda" <input_name: Parenthesized<Name>?> "{" <term: Operation> "}" => Term::Op(Lambda { term: Box::new(term),
         input_name, scope: uuid::Uuid::new_v4().to_string()}),
     "(" <o: Operation> ")" => o,
+    <follow: Follow> => Term::Op(Follow(follow)),
     <fm: Fm> <m:Rational> => Term::Op(TransposeM {m}),
     <fa: Fa> <a:Rational> => Term::Op(TransposeA {a}),
     <pm: Pm>  <m:Rational> => Term::Op(PanM {m}),
@@ -422,6 +426,50 @@ Operations = Comma<Operation>;
 CoefStart: (i64, i64) = {
     <n: Int> "|" <d:Int> => (n, d),
 }
+
+Follow: Follow = {
+    "Follow {" <rules: Comma<FollowRule>> "}" => Follow { rules }
+};
+
+FollowRule: FollowRule = {
+    <cond: FollowCondition> "->" <act: FollowAction> => FollowRule::Conditional { condition: cond, action: act },
+    "_" "->" <act: FollowAction> => FollowRule::Default(act),
+};
+
+FollowCondition: FollowCondition = {
+    <left: FollowCondition> "||" <right: FollowAndCondition> => FollowCondition::Or(Box::new(left), Box::new(right)),
+    <and: FollowAndCondition> => FollowCondition::And(and),
+};
+
+FollowAndCondition: FollowAndCondition = {
+    <left: FollowAndCondition> "&&" <right: FollowSimpleCondition> => FollowAndCondition::And(Box::new(left), Box::new(right)),
+    <simple: FollowSimpleCondition> => FollowAndCondition::Simple(simple),
+};
+
+FollowSimpleCondition: FollowSimpleCondition = {
+    <comp: FollowComparison> => FollowSimpleCondition::Comparison(comp),
+    "(" <cond: FollowCondition> ")" => FollowSimpleCondition::Nested(Box::new(cond)),
+};
+
+FollowComparison: FollowComparison = {
+    <var: FollowVariable> ">" <value: Rational> => FollowComparison::GreaterThan(var, value),
+    <var: FollowVariable> "<" <value: Rational> => FollowComparison::LessThan(var, value),
+    <var: FollowVariable> "==" <value: Rational> => FollowComparison::EqualTo(var, value),
+};
+
+FollowVariable: FollowVariable = {
+    "F" => FollowVariable::F,
+    "G" => FollowVariable::G,
+};
+
+FollowAction: FollowAction = {
+    "{" <expr_f: FollowExpr> "," <expr_g: FollowExpr> "}" => FollowAction { expr_f, expr_g },
+};
+
+FollowExpr: FollowExpr = {
+    <value: Rational> => FollowExpr::Value(value),
+    <var: FollowVariable> => FollowExpr::Variable(var),
+};
 
 
 Comma<T>: Vec<T> = {

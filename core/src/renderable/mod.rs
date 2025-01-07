@@ -107,7 +107,7 @@ mod tests {
                 names: vec![],
                 filters: vec![],
                 next_out: false,
-                follow: true,
+                follows: true,
             },
             RenderOp {
                 f: 330.0,
@@ -131,7 +131,7 @@ mod tests {
                 names: vec![],
                 filters: vec![],
                 next_out: false,
-                follow: true,
+                follows: true,
             },
             RenderOp {
                 f: 0.0,
@@ -155,7 +155,7 @@ mod tests {
                 names: vec![],
                 filters: vec![],
                 next_out: false,
-                follow: true,
+                follows: true,
             },
         ]];
         assert_eq!(result, expected);

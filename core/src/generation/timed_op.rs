@@ -77,6 +77,7 @@ impl TimedOp {
             filters: Vec::new(),
             //TODO
             is_out: false,
+            follows: vec![],
         }
     }
 

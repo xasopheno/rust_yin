@@ -1,3 +1,5 @@
+use weresocool_ast::follow::types::FollowNF;
+
 use crate::renderable::{Offset, RenderOp, Renderable};
 use crate::{Oscillator, StereoWaveform};
 
@@ -62,6 +64,7 @@ impl RenderVoice {
                 names: current_op.names.clone(),
                 filters: current_op.filters.clone(),
                 osc_type: current_op.osc_type.clone(),
+                follows: current_op.follows.clone(),
                 ..*current_op
             });
             self.sample_index += samples_left_in_batch;
@@ -73,6 +76,7 @@ impl RenderVoice {
                 names: current_op.names.clone(),
                 filters: current_op.filters.clone(),
                 osc_type: current_op.osc_type.clone(),
+                follows: current_op.follows.clone(),
                 ..*current_op
             });
 

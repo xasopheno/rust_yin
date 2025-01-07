@@ -10,6 +10,7 @@ use log::info;
 use opmap::OpMap;
 use std::sync::mpsc::Sender;
 use std::{path::PathBuf, sync::mpsc::SendError};
+use weresocool_ast::follow::evaluate::EvaluateAction;
 use weresocool_error::Error;
 use weresocool_instrument::renderable::{
     nf_to_vec_renderable, renderables_to_render_voices, Offset, RenderOp, RenderVoice, Renderable,
@@ -179,7 +180,7 @@ impl RenderManager {
 
             store.iter_mut().zip(to_store).for_each(|(voice, ops)| {
                 voice.extend(ops.into_iter().map(|mut op| {
-                    op.follow = false;
+                    op.follows = vec![];
                     op
                 }));
             });
@@ -271,13 +272,15 @@ impl RenderManager {
                                             .filter(|op| op.index % 6 == 0)
                                             .cloned()
                                             .map(|mut op| {
-                                                if op.follow {
-                                                    op.f *= offset.freq;
-                                                    op.g = (
-                                                        op.g.0 * offset.gain,
-                                                        op.g.1 * offset.gain,
-                                                    );
-                                                }
+                                                let follow_offset = op.follows.eval_value(
+                                                    offset.freq as f32,
+                                                    offset.gain as f32,
+                                                );
+                                                op.f *= follow_offset.0 as f64;
+                                                op.g = (
+                                                    op.g.0 * follow_offset.1 as f64,
+                                                    op.g.1 * follow_offset.1 as f64,
+                                                );
                                                 op
                                             })
                                             .collect();

@@ -2300,6 +2300,7 @@ dependencies = [
  "lalrpop",
  "lalrpop-util",
  "num-rational 0.4.2",
+ "num-traits",
  "path-clean",
  "rand 0.7.3",
  "regex",

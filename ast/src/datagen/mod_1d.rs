@@ -117,6 +117,7 @@ pub fn eeg_datum_to_point_op(
         names: nameset,
         filters: vec![],
         is_out: false,
+        follows: vec![],
     }
 }
 

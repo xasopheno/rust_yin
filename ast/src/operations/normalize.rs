@@ -1,4 +1,5 @@
 use crate::datagen::{csv2d_to_normalform, mod_1d::csv1d_to_normalform};
+use crate::follow::normalize::ToNF;
 use crate::operations::Rational64;
 use crate::operations::{
     helpers::*, substitute::insert_function_args, GetLengthRatio, NormalForm, Normalize, Substitute,
@@ -19,6 +20,12 @@ impl Normalize<Term> for Op {
         defs: &mut Defs<Term>,
     ) -> Result<(), Error> {
         match self {
+            Op::Follow(follow) => {
+                let fnf = follow.to_nf(Some(Default::default()));
+                input.fmap_mut(|op| {
+                    op.follows.push(fnf.clone());
+                });
+            }
             Op::AsIs => {}
             Op::Out => {
                 input.fmap_mut(|op| {

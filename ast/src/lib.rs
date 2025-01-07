@@ -2,6 +2,7 @@
 extern crate serde;
 pub mod ast;
 pub mod datagen;
+pub mod follow;
 pub mod generator;
 pub mod lists;
 pub mod nameset;
